@@ -15,7 +15,6 @@ def get_collaborative_recommendations():
     
     reviews_df = pd.DataFrame(data.get('Review'))
     restaurants_df = pd.DataFrame(data.get('Restaurant'))
-    users_df = pd.DataFrame(data.get('Users'))
     
     # --- 1. Criar Matriz Usuário-Restaurante ---
     # Linhas = usuários, Colunas = restaurantes, Valores = notas
@@ -25,7 +24,7 @@ def get_collaborative_recommendations():
         values='rating',
         fill_value=0
     )
-    print(user_item_matrix.head());
+    print(user_item_matrix.head())
     
     # --- 2. Calcular Similaridade entre Usuários ---
     # Usa Similaridade de Cosseno
@@ -43,7 +42,7 @@ def get_collaborative_recommendations():
     
     # Pega os 5 usuários mais similares (excluindo o próprio usuário)
     similar_users = user_similarity_df[user_id].sort_values(ascending=False)[1:6]
-    print(similar_users);
+    print(similar_users)
     
     # --- 4. Encontrar Restaurantes para Recomendar ---
     # Restaurantes já visitados pelo usuário
@@ -116,7 +115,7 @@ def find_user_name(user_id, data):
     return user["name"].upper() if user else "Unknown"
 
 @app.route("/recommender/similar", methods=['POST'])
-def recommender_similar():
+def get_content_recommendations():
 
     data = request.get_json()
 
@@ -175,14 +174,10 @@ def recommender_similar():
     recomendacoes_filtradas = [r for r in recomendacoes_finais if r not in restaurantes_ja_visitados]
     restaurantes_recomendados_df = restaurantes_df[restaurantes_df['restaurantId'].isin(recomendacoes_filtradas)]
 
-    # --- Função auxiliar ---
-    def find_nome_por_id(id_busca):
-        return next((u["name"] for u in data.get("Users") if u["userId"] == id_busca), None).upper()
-
     # --- Output ---
     recommended_restaurants = []
 
-    print(f"\n--- RECOMENDAÇÃO DE RESTAURANTES PARA O USUÁRIO {find_nome_por_id(data.get("UserRequestId"))} ---")
+    print(f"\n--- RECOMENDAÇÃO DE RESTAURANTES PARA O USUÁRIO {user_request_id} ---")
     if restaurantes_recomendados_df.empty:
         print("Nenhuma nova recomendação encontrada.")
         return {"message": "Nenhuma nova recomendação encontrada.", "restaurants": []}
@@ -198,7 +193,7 @@ def recommender_similar():
             recommended_restaurants.append(restaurant_data)
 
         return {
-            "user": find_nome_por_id(data.get("UserRequestId")), 
+            "user": user_request_id, 
             "total_restaurants": len(recommended_restaurants),
             "restaurants": recommended_restaurants
         }
