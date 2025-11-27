@@ -11,7 +11,7 @@ def get_collaborative_recommendations():
     # --- Carregar dados ---
     data = request.get_json()
     
-    user_id = data.get("UserRequestId")
+    user_id = data.get("userId")
     
     reviews_df = pd.DataFrame(data.get('Review'))
     restaurants_df = pd.DataFrame(data.get('Restaurant'))
@@ -94,17 +94,9 @@ def get_collaborative_recommendations():
         restaurant = restaurants_df[restaurants_df['restaurantId'] == restaurant_id].iloc[0]
         recommended_restaurants.append({
             "restaurantId": int(restaurant_id),
-            "name": restaurant['name'],
-            "type": restaurant['restaurantType'],
-            "averagePrice": float(restaurant['averagePrice']),
-            "averageRating": float(restaurant['averageRating']),
-            "recommendationScore": float(score)
         })
     
     return jsonify({
-        "user": find_user_name(user_id, data),
-        "method": "collaborative_filtering",
-        "totalRecommendations": len(recommended_restaurants),
         "restaurants": recommended_restaurants
     })
 
