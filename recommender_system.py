@@ -189,6 +189,45 @@ def get_content_recommendations():
             "total_restaurants": len(recommended_restaurants),
             "restaurants": recommended_restaurants
         }
+    
+@app.route("/recommender/onboarding", methods=['POST'])
+def get_onboarding_recommendations():
+    data = request.get_json()
+    
+    # Preferências do usuário novo
+    preferred_types = data.get("preferredTypes", [])
+    max_price = data.get("maxPrice", 100)
+    min_rating = 3
+    
+    restaurants_df = pd.DataFrame(data.get('Restaurant'))
+    reviews_df = pd.DataFrame(data.get('Review'))
+    
+    # Calcular média de avaliações
+    avg_ratings = reviews_df.groupby('restaurantId')['rating'].mean()
+    
+    # Filtrar por preferências
+    filtered = restaurants_df[
+        (restaurants_df['restaurantType'].isin(preferred_types)) &
+        (restaurants_df['averagePrice'] <= max_price)
+    ]
+    
+    # Adicionar rating médio
+    filtered['avg_rating'] = filtered['restaurantId'].map(avg_ratings)
+    
+    # Ordenar por rating
+    recommendations = filtered[
+        filtered['avg_rating'] >= min_rating
+    ].sort_values('avg_rating', ascending=False).head(10)
+    
+    # Retornar apenas restaurantId
+    recommended_restaurants = [
+        {"restaurantId": int(rest_id)} 
+        for rest_id in recommendations['restaurantId']
+    ]
+    
+    return jsonify({
+        "restaurants": recommended_restaurants
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
