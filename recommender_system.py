@@ -93,7 +93,7 @@ def get_collaborative_recommendations():
     for restaurant_id, score in sorted_recommendations:
         restaurant = restaurants_df[restaurants_df['restaurantId'] == restaurant_id].iloc[0]
         recommended_restaurants.append({
-            "restaurantId": int(restaurant_id),
+            "restaurantId": restaurant_id,
         })
     
     return jsonify({
@@ -221,7 +221,7 @@ def get_onboarding_recommendations():
     
     # Retornar apenas restaurantId
     recommended_restaurants = [
-        {"restaurantId": int(rest_id)} 
+        {"restaurantId": rest_id} 
         for rest_id in recommendations['restaurantId']
     ]
     
