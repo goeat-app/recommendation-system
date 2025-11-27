@@ -217,7 +217,7 @@ def get_onboarding_recommendations():
     # Ordenar por rating
     recommendations = filtered[
         filtered['avg_rating'] >= min_rating
-    ].sort_values('avg_rating', ascending=False).head(10)
+    ].sort_values('avg_rating', ascending=False)
     
     # Retornar apenas restaurantId
     recommended_restaurants = [
